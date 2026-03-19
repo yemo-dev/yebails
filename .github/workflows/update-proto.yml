@@ -34,12 +34,15 @@ jobs:
           cd proto-extract
           node index.js > ../wa-logs.txt
           cd ..
-          WA_VERSION=$(cat wa-logs.txt | perl -n -e'/Current version\: (.+)/ && print $1')
-          WA_REVISION=$(echo $WA_VERSION | perl -n -e'/(\d+)$/ && print $1')
-          WA_JS_URL=$(cat wa-logs.txt | perl -n -e'/Found source JS URL\: (.+)/ && print $1')
+          cat wa-logs.txt
+          WA_VERSION=$(grep "Current version:" wa-logs.txt | awk '{print $NF}')
+          WA_REVISION=$(echo $WA_VERSION | awk -F. '{print $NF}')
+          WA_JS_URL=$(grep "Found source JS URL:" wa-logs.txt | awk '{print $NF}')
           echo "wa_version=$WA_VERSION" >> $GITHUB_OUTPUT
           echo "wa_revision=$WA_REVISION" >> $GITHUB_OUTPUT
           echo "wa_js_url=$WA_JS_URL" >> $GITHUB_OUTPUT
+          echo "Detected Version: $WA_VERSION"
+          echo "Detected Revision: $WA_REVISION"
 
       - name: Generate Protobuf Statics
         run: yarn gen:protobuf
