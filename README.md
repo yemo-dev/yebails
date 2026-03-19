@@ -1,106 +1,157 @@
-# Yebails
+# Yebails - Next Generation WhatsApp Web API
 
-Yebails is a high-performance, feature-rich WhatsApp Web API library for Node.js. Optimized for protocol accuracy and speed, it is the most complete fork for modern WhatsApp features.
+A powerful, modular, and highly automated WhatsApp Web API library for Node.js. Optimized for performance and staying up-to-date with the latest WhatsApp features.
 
-## Table of Contents
-- [Installation](#installation)
-- [Connection](#connection)
-- [Messaging Basics](#messaging-basics)
-- [Advanced Messaging](#advanced-messaging)
-  - [Buttons & Interactive](#buttons--interactive)
-  - [Mention All](#mention-all)
-- [Privacy Settings](#privacy-settings)
-- [Newsletters (Channels)](#newsletters)
-- [Communities](#communities)
-- [Utilities](#utilities)
+---
+
+## Technical Credits
+- **Maintained by**: yemobyte
+- **Inspiration & Research**: Based on the groundbreaking work by the **WhiskeySockets** and **Itsukichann** teams.
+
+---
+
+## Key Features
+- **Full Beta Support**: Newsletters (Channels), Communities, and MEX Protocol integration.
+- **Advanced Messages**: Native Buttons, Interactive Lists, and Native Flow (V2) support.
+- **Privacy Mastery**: Full control over Last Seen, Online Status, Profile Picture, and Read Receipts.
+- **Automated Lifecycle**: Built-in Protobuf extraction and version auto-syncing.
+- **Lightweight & Modular**: Chained socket architecture for easy customization.
 
 ---
 
 ## Installation
 
 ```bash
-npm install yemo-dev/yebails
-```
-
-## Connection
-
-### Multi-Device Auth
-```javascript
-const makeWASocket = require('yebails').default;
-const { useMultiFileAuthState } = require('yebails');
-
-async function start() {
-    const { state, saveCreds } = await useMultiFileAuthState('auth_info');
-    const sock = makeWASocket({
-        auth: state,
-        printQRInTerminal: true,
-        // Latest Beta Version
-        version: [2, 3000, 1035465378] 
-    });
-    sock.ev.on('creds.update', saveCreds);
-}
-```
-
-## Messaging Basics
-
-### Simple Text & Media
-```javascript
-// Text
-await sock.sendMessage(jid, { text: 'Hello!' });
-
-// Image/Video/Audio
-await sock.sendMessage(jid, { 
-    image: { url: './img.jpg' }, 
-    caption: 'Caption here' 
-});
-
-// Delete Message
-await sock.sendMessage(jid, { delete: key });
+yarn add yebails
+# or
+npm install yebails
 ```
 
 ---
 
-## Advanced Messaging
+## Quick Start
 
-### Buttons (Interactive)
-Yebails supports native buttons and list messages.
-
+### Basic Connection
 ```javascript
-const buttons = [
-  { buttonId: 'id1', buttonText: { displayText: 'Button 1' }, type: 1 },
-  { buttonId: 'id2', buttonText: { displayText: 'Button 2' }, type: 1 }
-];
+const makeWASocket = require('yebails').default;
+const { useMultiFileAuthState } = require('yebails');
 
-const buttonMessage = {
-    text: "Pilih menu di bawah:",
-    footer: 'Yebails Multi-Device',
-    buttons: buttons,
-    headerType: 1
-};
+async function startSock() {
+    const { state, saveCreds } = await useMultiFileAuthState('auth_info');
+    
+    const sock = makeWASocket({
+        auth: state,
+        printQRInTerminal: true
+    });
 
-await sock.sendMessage(jid, buttonMessage);
+    sock.ev.on('creds.update', saveCreds);
+
+    sock.ev.on('messages.upsert', async m => {
+        console.log(JSON.stringify(m, undefined, 2));
+    });
+}
+
+startSock();
 ```
 
-### Native Flow (Interactive V2)
+---
+
+## API Reference
+
+### 📧 Messaging
+Primary functions for sending and managing messages.
+
+- **`sendMessage(jid, content, options)`**: Send any type of message (text, media, interactive).
+- **`relayMessage(jid, message, options)`**: Relay a raw protobuf message.
+- **`readMessages(keys)`**: Mark a list of messages as read.
+- **`sendReceipt(jid, participant, messageIds, type)`**: Send delivery/read receipts manually.
+- **`sendPresenceUpdate(presence, jid)`**: Update your presence (composing, recording, available).
+- **`presenceSubscribe(jid)`**: Subscribe to a user's presence updates.
+
+### 👥 Group Management
+Full suite of administrative and member-level group controls.
+
+- **`groupCreate(subject, participants)`**: Create a new group.
+- **`groupMetadata(jid)`**: Fetch detailed group information.
+- **`groupParticipantsUpdate(jid, participants, action)`**: Add, remove, promote, or demote members.
+- **`groupUpdateSubject(jid, subject)`**: Change group name.
+- **`groupUpdateDescription(jid, description)`**: Change group description.
+- **`groupSettingUpdate(jid, setting)`**: Update settings (announcement, locked).
+- **`groupInviteCode(jid)`**: Get group invite link.
+- **`groupRevokeInvite(jid)`**: Reset group invite link.
+- **`groupAcceptInvite(code)`**: Join group via link.
+- **`groupLeave(jid)`**: Leave a group.
+
+### 📢 Newsletters (Channels)
+State-of-the-art support for WhatsApp Channels using the MEX Protocol.
+
+- **`newsletterCreate(name, description)`**: Create a new channel.
+- **`newsletterMetadata(type, key)`**: Fetch channel info (by JID or Invite link).
+- **`newsletterFollow(jid)`**: Follow a channel.
+- **`newsletterUnfollow(jid)`**: Unfollow a channel.
+- **`newsletterMute(jid)`**: Mute notifications.
+- **`newsletterUnmute(jid)`**: Unmute notifications.
+- **`newsletterAdminPromote(jid, userJid)`**: Promote a user to channel admin.
+- **`newsletterAdminDemote(jid, userJid)`**: Demote a channel admin.
+- **`newsletterDelete(jid)`**: Delete a channel.
+- **`newsletterReactMessage(jid, serverId, reaction)`**: React to channel messages.
+
+### 🌐 Communities
+Manage WhatsApp Communities and their linked subgroups.
+
+- **`communityCreate(subject, description)`**: Create a new community.
+- **`communityMetadata(jid)`**: Fetch community details and participants.
+- **`communityLinkGroup(groupJid, communityJid)`**: Add a group to a community.
+- **`communityUnlinkGroup(groupJid, communityJid)`**: Remove a group from a community.
+- **`communityLeave(jid)`**: Leave a community.
+
+### 🔒 Privacy & Profile
+Granular control over your account's visibility.
+
+- **`updateProfileName(name)`**: Change your display name.
+- **`updateProfileStatus(status)`**: Update your "About" text.
+- **`updateProfilePicture(jid, content)`**: Update profile or group photo.
+- **`fetchPrivacySettings()`**: Get current privacy configuration.
+- **`updateLastSeenPrivacy(value)`**: Set who can see your "Last Seen".
+- **`updateOnlinePrivacy(value)`**: Set who can see if you are "Online".
+- **`updateProfilePicturePrivacy(value)`**: Set visibility for your profile picture.
+- **`updateReadReceiptsPrivacy(value)`**: Toggle Blue Ticks.
+- **`updateGroupsAddPrivacy(value)`**: Control who can add you to groups.
+
+### 💼 Business Features
+Essential tools for WhatsApp Business accounts.
+
+- **`getBusinessProfile(jid)`**: Fetch business profile info.
+- **`updateBusinessProfile(updates)`**: Update business details (address, email, website).
+- **`productCreate(product)`**: Add a product to your catalog.
+- **`productUpdate(productId, updates)`**: Modify an existing product.
+- **`productDelete(productId)`**: Remove a product.
+
+---
+
+## Advanced Examples
+
+### Sending Native Flow Messages (Interactive V2)
 ```javascript
-const interactiveMessage = {
+const flowMessage = {
     viewOnceMessage: {
         message: {
             interactiveMessage: {
-                header: { title: "Title" },
-                body: { text: "Body Text" },
-                footer: { text: "Footer Text" },
+                header: { title: "Select Destination" },
+                body: { text: "Click the button below to open the form." },
+                footer: { text: "Yebails Automation" },
                 nativeFlowMessage: {
                     buttons: [
                         {
                             name: "single_select",
                             buttonParamsJson: JSON.stringify({
-                                title: "Pilih Item",
+                                title: "Options",
                                 sections: [
                                     {
-                                        title: "Section 1",
+                                        title: "Destinations",
                                         rows: [
-                                            { header: "H1", title: "T1", description: "D1", id: "ID1" }
+                                            { header: "Jakarta", title: "Indonesia", id: "IDN" },
+                                            { header: "Tokyo", title: "Japan", id: "JPN" }
                                         ]
                                     }
                                 ]
@@ -113,89 +164,31 @@ const interactiveMessage = {
     }
 };
 
-await sock.sendMessage(jid, interactiveMessage);
+await sock.sendMessage(jid, flowMessage);
 ```
 
-### Mention All (Beta)
-Tag every group member instantly.
+### Mentioning Everyone in a Group
+Using the latest `mentionAll` beta feature:
 ```javascript
 await sock.sendMessage(jid, { 
-    text: 'Halo Semuanya!',
+    text: "Hello everyone!",
     contextInfo: { mentionAll: true } 
 });
 ```
 
 ---
 
-## Privacy Settings
+## 🤖 Automated Proto Update
+Yebails includes a specialized GitHub Workflow that keeps the library always in sync with WhatsApp.
 
-Control your account privacy programmatically.
-
-```javascript
-// Fetch all current settings
-const settings = await sock.fetchPrivacySettings();
-
-// Update specific settings
-await sock.updateLastSeenPrivacy('contacts'); 
-await sock.updateOnlinePrivacy('all');
-await sock.updateProfilePicturePrivacy('everyone');
-await sock.updateStatusPrivacy('contacts');
-await sock.updateReadReceiptsPrivacy('none');
-await sock.updateGroupsAddPrivacy('contacts_blacklist');
-await sock.updateDefaultDisappearingMode(86400); // 24 hours
-```
+- **Frequency**: Every 24 hours.
+- **Action**: Scraping `web.whatsapp.com`, extracting the latest Protobuf (`WAProto.proto`), and regenerating the internal static structures.
+- **Effect**: You will always have the latest message types and beta features without any manual updates.
 
 ---
-
-## Newsletters (Channels)
-
-Yebails uses the **MEX Protocol** for stable Newsletter management.
-
-| Function | Description |
-| :--- | :--- |
-| `newsletterCreate(name)` | Create a new channel. |
-| `newsletterMetadata('jid', id)` | Fetch channel details via MEX. |
-| `newsletterFollow(id)` | Follow a channel. |
-| `newsletterUnfollow(id)` | Unfollow a channel. |
-| `newsletterMute(id)` | Mute channel notifications. |
-| `newsletterReactMessage(id, sid, code)` | React to a channel post. |
-
----
-
-## Communities
-
-Full support for Parent Groups and Subgroup linking.
-
-```javascript
-// Create a Community
-const comm = await sock.communityCreate('Work Hub', 'Centralized group');
-
-// Link group to community
-await sock.communityLinkGroup(parentJid, subgroupJid);
-```
-
----
-
-## Utilities
-
-### MCC Lookup (Mobile Country Code)
-Detect the MCC of any number for identity verification.
-```javascript
-const { getMCC } = require('yebails/lib/Utils');
-const mcc = getMCC('628xxx'); // Returns "510"
-```
-
-### Version Auto-Update
-Yebails automatically tracks the latest WhatsApp Web revisions.
-```javascript
-const { fetchLatestWaWebVersion } = require('yebails/lib/Utils');
-const { version } = await fetchLatestWaWebVersion();
-```
-
----
-
-## Credits
-Maintained by **yemobyte**. Inspired by the excellent research in **WhiskeySockets** and **Itsukichann**.
 
 ## License
 MIT
+
+---
+*Powered by Yebails Ecosystem.*
