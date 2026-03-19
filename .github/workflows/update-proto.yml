@@ -1,0 +1,65 @@
+name: Update WAProto
+
+on:
+  schedule:
+    - cron: '10 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-proto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install Root Dependencies
+        run: yarn install
+
+      - name: Install proto-extract Dependencies
+        run: npm install --prefix proto-extract
+
+      - name: Update WAProto.proto
+        id: wa_proto_info
+        run: |
+          cd proto-extract
+          node index.js > ../wa-logs.txt
+          cd ..
+          WA_VERSION=$(cat wa-logs.txt | perl -n -e'/Current version\: (.+)/ && print $1')
+          WA_JS_URL=$(cat wa-logs.txt | perl -n -e'/Found source JS URL\: (.+)/ && print $1')
+          echo "wa_version=$WA_VERSION" >> $GITHUB_OUTPUT
+          echo "wa_js_url=$WA_JS_URL" >> $GITHUB_OUTPUT
+
+      - name: Generate Statics
+        run: yarn gen:protobuf
+
+      - name: Update Yebails Version Files
+        run: node scripts/update-wa-version.js
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: 'chore: updated proto and version to v${{steps.wa_proto_info.outputs.wa_version}}'
+          title: 'WhatsApp v${{steps.wa_proto_info.outputs.wa_version}} Proto Update'
+          branch: 'automation/update-proto'
+          delete-branch: true
+          labels: 'automation, update-proto'
+          body: |
+            ## Automated Proto Update
+            - **WhatsApp Version**: v${{steps.wa_proto_info.outputs.wa_version}}
+            - **Source JS URL**: ${{steps.wa_proto_info.outputs.wa_js_url}}
+            
+            This PR updates `WAProto.proto`, regenerates static JS files, and syncs the library version.
+          add-paths: |
+            WAProto/*
+            lib/Defaults/yebails-version.json
+            lib/Defaults/index.js
