@@ -1,0 +1,10 @@
+node_modules
+WAProto/index.js
+WAProto/WAProto.js
+*.tsbuildinfo
+docs
+package-lock.json
+yarn.lock
+.yebails_cache
+auth_info_baileys
+tmp
