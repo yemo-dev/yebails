@@ -1,15 +1,16 @@
 # Yebails
 
-Yebails is a high-performance, feature-rich WhatsApp Web API library for Node.js. It is a specialized fork of Baileys, optimized for speed, stability, and protocol accuracy. This library supports the latest WhatsApp Web features, including Multi-Device, Newsletters (Channels), Communities, and MEX protocol queries.
+Yebails is a high-performance, feature-rich WhatsApp Web API library for Node.js. Optimized for speed and protocol accuracy, it supports the latest features including Multi-Device, Newsletters, Communities, and Advanced Messaging Protocols.
 
-## Key Features
+## Features
 
-- **Full Multi-Device Support**: Efficient session management and synchronization.
-- **MEX Protocol**: Support for GraphQL-style Message Exchange queries used in modern WA features.
-- **Newsletters & Channels**: Complete API for creating, managing, and subscribing to newsletters.
-- **Communities**: Robust support for managing communities and parent-linked groups.
-- **LID & PN Mapping**: Advanced handling of Lid (Logical Identity) and Phone Number resolutions.
-- **Automated Version Updates**: Integrated mechanism to fetch and update the latest WhatsApp Web client revision.
+- **Multi-Device Support**: Efficient session management.
+- **MEX Protocol**: GraphQL-style queries for modern WA features.
+- **Newsletters & Channels**: Full management of WhatsApp Channels.
+- **Communities**: Parent-group and subgroup linking.
+- **LID & PN Mapping**: Identity resolution for Logical IDs.
+- **MCC Lookup**: Integrated Mobile Country Code detection.
+- **Automated Updates**: Keeps its version synced with WhatsApp Web revisions.
 
 ## Installation
 
@@ -17,125 +18,113 @@ Yebails is a high-performance, feature-rich WhatsApp Web API library for Node.js
 npm install yemo-dev/yebails
 ```
 
-## Basic Usage
+## Connection
 
-### Connection
-
+### Using QR Code
 ```javascript
 const makeWASocket = require('yebails').default;
 const { useMultiFileAuthState } = require('yebails');
 
-async function connectToWhatsApp() {
-    const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
-    
+async function connect() {
+    const { state, saveCreds } = await useMultiFileAuthState('auth_info');
     const sock = makeWASocket({
         auth: state,
-        printQRInTerminal: true,
-        logger: P({ level: 'silent' })
+        printQRInTerminal: true
     });
-
     sock.ev.on('creds.update', saveCreds);
-
-    sock.ev.on('connection.update', (update) => {
-        const { connection, lastDisconnect } = update;
-        if (connection === 'close') {
-            const shouldReconnect = lastDisconnect.error?.output?.statusCode !== 401;
-            if (shouldReconnect) {
-                connectToWhatsApp();
-            }
-        } else if (connection === 'open') {
-            console.log('Opened connection');
-        }
-    });
-
-    return sock;
 }
 ```
 
-## Messaging Examples
-
-### Sending a Simple Text Message
-
+### Using Pairing Code
 ```javascript
-await sock.sendMessage(jid, { text: 'Hello from Yebails!' });
+const sock = makeWASocket({
+    auth: state,
+    browser: ["Ubuntu", "Chrome", "20.0.04"]
+});
+
+if (!sock.authState.creds.registered) {
+    const code = await sock.requestPairingCode('628xxx');
+    console.log('Pairing Code:', code);
+}
 ```
 
-### Context and Mentions (ctx)
+## Basic Messaging
 
+### Send Text & Media
 ```javascript
+// Simple Text
+await sock.sendMessage(jid, { text: 'Hello!' });
+
+// Image with Caption
 await sock.sendMessage(jid, { 
-    text: 'Hello @1234567890', 
-    mentions: ['1234567890@s.whatsapp.net'],
+    image: { url: './image.jpg' }, 
+    caption: 'Behold!' 
+});
+
+// Location
+await sock.sendMessage(jid, { 
+    location: { degreesLatitude: -7.0, degreesLongitude: 110.0 } 
+});
+```
+
+## Advanced Messaging (ctx, pay, ai)
+
+### Interactive Context (ctx)
+```javascript
+await sock.sendMessage(jid, {
+    text: 'Check this out!',
     contextInfo: {
         externalAdReply: {
             title: 'Yebails API',
-            body: 'Modern WhatsApp Library',
-            mediaType: 2,
-            thumbnailUrl: 'https://example.com/thumb.jpg',
+            body: 'Advanced Baileys Fork',
+            mediaType: 1,
+            thumbnailUrl: 'https://example.com/icon.png',
             sourceUrl: 'https://github.com/yemo-dev/yebails'
         }
     }
 });
 ```
 
-### Sending a Payment Request (pay)
-
+### Payments (pay)
 ```javascript
-const { proto } = require('yebails');
-
 await sock.sendMessage(jid, {
     paymentRequestMessage: {
         curr: 'USD',
-        amount1000: 10000, // $10.00
-        receiverJid: jid,
-        status: proto.Message.PaymentRequestMessage.Status.PENDING,
-        noteMessage: { extendedTextMessage: { text: 'Payment for services' } }
+        amount1000: 5000,
+        status: 1,
+        noteMessage: { extendedTextMessage: { text: 'Monthly Subscription' } }
     }
 });
 ```
 
-## Advanced Features
-
-### Newsletters (Channels)
+### AI & Specialized Icons
+Yebails supports custom internal flags for AI-integrated message icons and specialized protocol markers via `additionalAttributes`.
 
 ```javascript
-// Creating a newsletter
-const metadata = await sock.newsletterCreate('My Channel', 'Description of the channel');
-console.log('Created Newsletter:', metadata.id);
-
-// Subscribing/Unsubscribing
-await sock.newsletterSubscribe(newsletterJid);
-await sock.newsletterUnsubscribe(newsletterJid);
-
-// Fetching metadata via MEX
-const info = await sock.newsletterMetadata('jid', newsletterJid);
+await sock.sendMessage(jid, { text: 'AI Response' }, { 
+    additionalAttributes: { 'biz_source': 'ai_agent' } 
+});
 ```
 
-### Communities
+## Utility Functions
 
+### MCC Lookup
+Get the Mobile Country Code for any number.
 ```javascript
-// Creating a community
-const result = await sock.communityCreate('Work Community', 'Discussion for all work subgroups');
-
-// Linking a group to a community
-await sock.communityLinkGroup(subGroupJid, communityJid);
-
-// Fetching participating communities
-const communities = await sock.communityFetchAllParticipating();
+const { getMCC } = require('yebails/lib/Utils');
+const mcc = getMCC('62812345678'); // Returns "510" (Indonesia)
 ```
 
-### Identity Resolution (LID/PN)
-
+### Version Tracking
 ```javascript
-// Mapping phone numbers to LIDs
-const mapping = await sock.getLIDsForPNs(['628123456789@s.whatsapp.net']);
-console.log('LID Mapping:', mapping);
+const { fetchLatestWaWebVersion } = require('yebails/lib/Utils');
+const { version } = await fetchLatestWaWebVersion();
+console.log('Latest WA Web Version:', version);
 ```
 
 ## Credits
 
-Yebails is developed and maintained by **yemobyte**. It is built upon the foundation of the WhiskeySockets/Baileys project and incorporates various improvements and beta features from the WhatsApp Web protocol.
+Developed and maintained by **yemobyte**. Special thanks to the **WhiskeySockets** and **Itsukichann** communities for the foundational protocol research.
 
 ## License
-
-This project is licensed under the MIT License.
+MIT
