@@ -1,6 +1,4 @@
 node_modules
-WAProto/index.js
-WAProto/WAProto.js
 *.tsbuildinfo
 docs
 package-lock.json

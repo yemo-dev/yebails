@@ -34,17 +34,26 @@ jobs:
         id: wa_proto_info
         run: |
           cd proto-extract
-          node index.js > ../wa-logs.txt
+          node index.js | tee ../wa-logs.txt
           cd ..
-          cat wa-logs.txt
-          WA_VERSION=$(grep "Current version:" wa-logs.txt | awk '{print $NF}')
+          # More robust extraction using grep -oP or awk
+          WA_VERSION=$(grep "Current version:" wa-logs.txt | head -n 1 | awk -F': ' '{print $2}' | xargs)
+          WA_JS_URL=$(grep "Found source JS URL:" wa-logs.txt | head -n 1 | awk -F': ' '{print $2}' | xargs)
+          
+          if [ -z "$WA_VERSION" ]; then
+             echo "ERROR: Failed to extract WA version. Defaulting to 1.0.0"
+             WA_VERSION="1.0.0"
+          fi
+          
+          # Extract revision (last part of version)
           WA_REVISION=$(echo $WA_VERSION | awk -F. '{print $NF}')
-          WA_JS_URL=$(grep "Found source JS URL:" wa-logs.txt | awk '{print $NF}')
+          
           echo "wa_version=$WA_VERSION" >> $GITHUB_OUTPUT
           echo "wa_revision=$WA_REVISION" >> $GITHUB_OUTPUT
           echo "wa_js_url=$WA_JS_URL" >> $GITHUB_OUTPUT
-          echo "Detected Version: $WA_VERSION"
-          echo "Detected Revision: $WA_REVISION"
+          
+          echo "DEBUG: WA_VERSION='$WA_VERSION'"
+          echo "DEBUG: WA_REVISION='$WA_REVISION'"
 
       - name: Generate Protobuf Statics
         run: yarn gen:protobuf
@@ -56,7 +65,8 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add WAProto/* lib/Defaults/yebails-version.json lib/Defaults/index.js
+          # Force add files that might be ignored (e.g., WAProto/index.js)
+          git add -f WAProto/* lib/Defaults/yebails-version.json lib/Defaults/index.js
           if git diff --staged --quiet; then
             echo "No changes detected, skipping push."
           else
