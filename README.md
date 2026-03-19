@@ -4,14 +4,7 @@ A powerful, modular WhatsApp Web API library optimized for performance and the l
 
 ---
 
-## Technical Credits
-- **Maintained by**: yemobyte
-- **Inspiration**: Based on research by **WhiskeySockets** and **Itsukichann**.
-
----
-
 ## Index
-- [Installation](#installation)
 - [Quick Start](#quick-start)
   - [Connecting with QR](#connecting-with-qr)
   - [Connecting with Pairing Code](#connecting-with-pairing-code)
@@ -34,19 +27,7 @@ A powerful, modular WhatsApp Web API library optimized for performance and the l
   - [Profile Updates](#profile-updates)
 - [Business Features](#business-features)
 - [Automated Updates](#automated-updates)
-- [License](#license)
 
----
-
-## Installation
-
-```bash
-yarn add yebails
-# or
-npm install yebails
-```
-
----
 
 ## Quick Start
 
@@ -267,10 +248,6 @@ Yebails is equipped with a **Proto-Extractor System** that automatically:
 
 This ensures your bot is always compatible with the newest message types without manual intervention.
 
----
-
-## License
-MIT
 
 ---
-*Maintained by yemobyte. Inspired by WhiskeySockets & Itsukichann research.*
+*Powered by Yebails Ecosystem.*
