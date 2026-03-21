@@ -67797,6 +67797,9 @@ export namespace proto {
 
             /** StatusPrivacyAction shareToIG */
             shareToIG?: (boolean|null);
+
+            /** StatusPrivacyAction customLists */
+            customLists?: (proto.SyncActionValue.StatusPrivacyAction.ICustomList[]|null);
         }
 
         /** Represents a StatusPrivacyAction. */
@@ -67819,6 +67822,9 @@ export namespace proto {
 
             /** StatusPrivacyAction shareToIG. */
             public shareToIG?: (boolean|null);
+
+            /** StatusPrivacyAction customLists. */
+            public customLists: proto.SyncActionValue.StatusPrivacyAction.ICustomList[];
 
             /** StatusPrivacyAction _mode. */
             public _mode?: "mode";
@@ -67909,12 +67915,146 @@ export namespace proto {
 
         namespace StatusPrivacyAction {
 
+            /** Properties of a CustomList. */
+            interface ICustomList {
+
+                /** CustomList id */
+                id?: (number|Long|null);
+
+                /** CustomList name */
+                name?: (string|null);
+
+                /** CustomList emoji */
+                emoji?: (string|null);
+
+                /** CustomList isSelected */
+                isSelected?: (boolean|null);
+
+                /** CustomList userJid */
+                userJid?: (string[]|null);
+            }
+
+            /** Represents a CustomList. */
+            class CustomList implements ICustomList {
+
+                /**
+                 * Constructs a new CustomList.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: proto.SyncActionValue.StatusPrivacyAction.ICustomList);
+
+                /** CustomList id. */
+                public id?: (number|Long|null);
+
+                /** CustomList name. */
+                public name?: (string|null);
+
+                /** CustomList emoji. */
+                public emoji?: (string|null);
+
+                /** CustomList isSelected. */
+                public isSelected?: (boolean|null);
+
+                /** CustomList userJid. */
+                public userJid: string[];
+
+                /** CustomList _id. */
+                public _id?: "id";
+
+                /** CustomList _name. */
+                public _name?: "name";
+
+                /** CustomList _emoji. */
+                public _emoji?: "emoji";
+
+                /** CustomList _isSelected. */
+                public _isSelected?: "isSelected";
+
+                /**
+                 * Creates a new CustomList instance using the specified properties.
+                 * @param [properties] Properties to set
+                 * @returns CustomList instance
+                 */
+                public static create(properties?: proto.SyncActionValue.StatusPrivacyAction.ICustomList): proto.SyncActionValue.StatusPrivacyAction.CustomList;
+
+                /**
+                 * Encodes the specified CustomList message. Does not implicitly {@link proto.SyncActionValue.StatusPrivacyAction.CustomList.verify|verify} messages.
+                 * @param message CustomList message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encode(message: proto.SyncActionValue.StatusPrivacyAction.ICustomList, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Encodes the specified CustomList message, length delimited. Does not implicitly {@link proto.SyncActionValue.StatusPrivacyAction.CustomList.verify|verify} messages.
+                 * @param message CustomList message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encodeDelimited(message: proto.SyncActionValue.StatusPrivacyAction.ICustomList, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Decodes a CustomList message from the specified reader or buffer.
+                 * @param reader Reader or buffer to decode from
+                 * @param [length] Message length if known beforehand
+                 * @returns CustomList
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): proto.SyncActionValue.StatusPrivacyAction.CustomList;
+
+                /**
+                 * Decodes a CustomList message from the specified reader or buffer, length delimited.
+                 * @param reader Reader or buffer to decode from
+                 * @returns CustomList
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): proto.SyncActionValue.StatusPrivacyAction.CustomList;
+
+                /**
+                 * Verifies a CustomList message.
+                 * @param message Plain object to verify
+                 * @returns `null` if valid, otherwise the reason why it is not
+                 */
+                public static verify(message: { [k: string]: any }): (string|null);
+
+                /**
+                 * Creates a CustomList message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns CustomList
+                 */
+                public static fromObject(object: { [k: string]: any }): proto.SyncActionValue.StatusPrivacyAction.CustomList;
+
+                /**
+                 * Creates a plain object from a CustomList message. Also converts values to other types if specified.
+                 * @param message CustomList
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: proto.SyncActionValue.StatusPrivacyAction.CustomList, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this CustomList to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for CustomList
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
             /** StatusDistributionMode enum. */
             enum StatusDistributionMode {
                 ALLOW_LIST = 0,
                 DENY_LIST = 1,
                 CONTACTS = 2,
-                CLOSE_FRIENDS = 3
+                CLOSE_FRIENDS = 3,
+                CUSTOM_LIST = 4
             }
         }
 
