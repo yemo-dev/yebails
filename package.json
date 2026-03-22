@@ -17,11 +17,10 @@
     "changelog:preview": "conventional-changelog -p angular -u",
     "changelog:update": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "example": "node --inspect -r ts-node/register Example/example.ts",
-    "gen:protobuf": "sh WAProto/GenerateStatics.sh",
+    "gen:protobuf": "npx pbjs -t static-module -w commonjs -o ./WAProto/index.js ./WAProto/WAProto.proto && npx pbts -o ./WAProto/index.d.ts ./WAProto/index.js",
     "lint": "eslint src --ext .js,.ts,.jsx,.tsx",
     "lint:fix": "eslint src --fix --ext .js,.ts,.jsx,.tsx",
     "prepack": "echo 'Yebails WhatsApp Library'",
-    "prepare": "npm run gen:protobuf",
     "preinstall": "node ./engine-requirements.js",
     "release": "release-it",
     "test": "jest"

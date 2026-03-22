@@ -54,21 +54,18 @@ jobs:
           echo "DEBUG: WA_REVISION='$WA_REVISION'"
 
       - name: Generate Protobuf Statics
-        run: yarn gen:protobuf
-
-      - name: Update Yebails Version Files
-        run: node scripts/update-wa-version.js
+        run: npm run gen:protobuf
 
       - name: Commit and Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           # Force add files that might be ignored (e.g., WAProto/index.js)
-          git add -f WAProto/* lib/Defaults/yebails-version.json lib/Defaults/index.js
+          git add -f WAProto/*
           if git diff --staged --quiet; then
             echo "No changes detected, skipping push."
           else
-            git commit -m "chore: automated update to WhatsApp v${{ steps.wa_proto_info.outputs.wa_version }}"
+            git commit -m "chore: automated update to WAProto v${{ steps.wa_proto_info.outputs.wa_version }}"
             git push origin main
           fi
         env:
